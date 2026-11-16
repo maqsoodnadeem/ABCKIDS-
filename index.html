@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ABC Kids - Learn & Play</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <meta name="theme-color" content="#FF6B6B">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Fredoka One', 'Bubblegum Sans', 'Segoe UI', Roboto, sans-serif;
+    }
+
+    :root {
+      --bg-gradient: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%);
+      --card-radius: 24px;
+      --shadow-color: rgba(0, 0, 0, 0.15);
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #4A90E2;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Outer Wrapper simulation of Android Frame */
+    #app-container {
+      width: 100%;
+      height: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      background: linear-gradient(180deg, #FFF9E6 0%, #E6F7FF 100%);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    /* Top Bar */
+    header {
+      height: 64px;
+      background: #FF6B6B;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      box-shadow: 0 4px 10px var(--shadow-color);
+      z-index: 10;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: bold;
+      text-shadow: 2px 2px 0px #C0392B;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      background: #FFD166;
+      border: 3px solid #FFF;
+      color: #333;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 6px 14px;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #D4A300;
+      transition: transform 0.1s, box-shadow 0.1s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #D4A300;
+    }
+
+    /* Main Content Area */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      position: relative;
+    }
+
+    /* Screens */
+    .screen {
+      display: none;
+      height: 100%;
+      flex-direction: column;
+      animation: popIn 0.3s ease-out;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Home Screen Buttons */
+    .home-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      height: 100%;
+      padding-bottom: 10px;
+    }
+
+    .menu-btn {
+      border: 4px solid #FFF;
+      border-radius: var(--card-radius);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 0 rgba(0,0,0,0.2);
+      transition: transform 0.15s;
+      text-decoration: none;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+      padding: 10px;
+    }
+
+    .menu-btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+    }
+
+    .menu-btn .icon {
+      font-size: 50px;
+      margin-bottom: 8px;
+      filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.2));
+    }
+
+    .menu-btn .label {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .btn-abc { background: linear-gradient(145deg, #FF5964, #FF2E3C); }
+    .btn-123 { background: linear-gradient(145deg, #35A7FF, #0084FF); }
+    .btn-colors { background: linear-gradient(145deg, #FFC72C, #FFA000); }
+    .btn-animals { background: linear-gradient(145deg, #38B000, #007200); }
+    .btn-game { 
+      grid-column: span 2; 
+      background: linear-gradient(145deg, #9D4EDD, #7B2CBF);
+      flex-direction: row;
+      gap: 16px;
+      height: 90px;
+    }
+
+    /* Grid Layouts for Modules */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 12px;
+      padding-bottom: 20px;
+    }
+
+    .item-card {
+      background: white;
+      border-radius: 18px;
+      padding: 10px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 0 #CBD5E1;
+      border: 3px solid #F1F5F9;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .item-card:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #CBD5E1;
+    }
+
+    /* Detail Modal Popup */
+    .modal-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: white;
+      border-radius: 32px;
+      width: 100%;
+      max-width: 320px;
+      padding: 24px;
+      text-align: center;
+      border: 6px solid #FFD166;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+      position: relative;
+      animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #FF5964;
+      color: white;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #C0392B;
+    }
+
+    /* Colors Module Specific */
+    .color-card {
+      height: 100px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 22px;
+      font-weight: bold;
+      text-shadow: 1px 2px 4px rgba(0,0,0,0.6);
+      border: 4px solid white;
+      box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+      cursor: pointer;
+    }
+
+    /* Game Module */
+    .game-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: space-around;
+    }
+
+    .game-score {
+      font-size: 20px;
+      font-weight: bold;
+      color: #2B2D42;
+      background: #E2E8F0;
+      padding: 6px 16px;
+      border-radius: 20px;
+    }
+
+    .target-box {
+      width: 160px;
+      height: 160px;
+      background: white;
+      border: 4px dashed #9D4EDD;
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+    }
+
+    .draggable-options {
+      display: flex;
+      gap: 16px;
+    }
+
+    .draggable-letter {
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(145deg, #FFC72C, #FFA000);
+      color: white;
+      font-size: 36px;
+      font-weight: bold;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 0 #D4A300;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    /* AdMob Banner Simulation */
+    .admob-banner {
+      height: 50px;
+      background: #2D3748;
+      color: #A0AEC0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-size: 11px;
+      border-top: 2px solid #4A5568;
+      flex-shrink: 0;
+    }
+
+    .ad-badge {
+      background: #ECC94B;
+      color: #744210;
+      font-weight: bold;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-size: 9px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app-container">
+    <!-- Header Navigation -->
+    <header>
+      <h1 id="header-title">🎈 ABC Kids</h1>
+      <button class="nav-btn" id="home-btn" style="display:none;" onclick="showScreen('home')">🏠 Home</button>
+    </header>
+
+    <!-- Main Screens Container -->
+    <main>
+      
+      <!-- HOME SCREEN -->
+      <div id="screen-home" class="screen active">
+        <div class="home-grid">
+          <div class="menu-btn btn-abc" onclick="showScreen('abc')">
+            <div class="icon">🔤</div>
+            <div class="label">ABC</div>
+          </div>
+          <div class="menu-btn btn-123" onclick="showScreen('123')">
+            <div class="icon">🔢</div>
+            <div class="label">1 2 3</div>
+          </div>
+          <div class="menu-btn btn-colors" onclick="showScreen('colors')">
+            <div class="icon">🎨</div>
+            <div class="label">Colors</div>
+          </div>
+          <div class="menu-btn btn-animals" onclick="showScreen('animals')">
+            <div class="icon">🦁</div>
+            <div class="label">Animals</div>
+          </div>
+          <div class="menu-btn btn-game" onclick="showScreen('game')">
+            <div class="icon">🧩</div>
+            <div class="label">Match Game</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABC SCREEN -->
+      <div id="screen-abc" class="screen">
+        <div class="cards-grid" id="abc-grid"></div>
+      </div>
+
+      <!-- 123 SCREEN -->
+      <div id="screen-123" class="screen">
+        <div class="cards-grid" id="123-grid"></div>
+      </div>
+
+      <!-- COLORS SCREEN -->
+      <div id="screen-colors" class="screen">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;" id="colors-grid"></div>
+      </div>
+
+      <!-- ANIMALS SCREEN -->
+      <div id="screen-animals" class="screen">
+        <div class="cards-grid" id="animals-grid" style="grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));"></div>
+      </div>
+
+      <!-- MATCH GAME SCREEN -->
+      <div id="screen-game" class="screen">
+        <div class="game-area">
+          <div class="game-score">Score: <span id="game-score">0</span> 🌟</div>
+          <p style="font-size: 18px; color: #4A5568; font-weight: bold; margin: 4px 0;">Drag the correct Letter!</p>
+          
+          <div class="target-box" id="target-box">
+            <span id="target-emoji" style="font-size: 70px;">🍎</span>
+            <span id="target-word" style="font-size: 18px; font-weight: bold; color: #2D3748;">Apple</span>
+          </div>
+
+          <div class="draggable-options" id="options-container"></div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Modal Popup for Detail View -->
+    <div class="modal-overlay" id="detail-modal" onclick="closeModal(event)">
+      <div class="modal-card" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <div id="modal-content"></div>
+      </div>
+    </div>
+
+    <!-- AdMob Banner Ad (Sticky Bottom) -->
+    <div class="admob-banner">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span class="ad-badge">Ad</span>
+        <span>Google AdMob Banner</span>
+      </div>
+      <span style="font-style: italic;">Test Ad - ca-app-pub-3940256099942544/6300978111</span>
+    </div>
+
+  </div>
+
+  <script>
+    /* Data Definitions */
+    const abcData = [
+      { letter: 'A', word: 'Apple', emoji: '🍎' },
+      { letter: 'B', word: 'Ball', emoji: '⚽' },
+      { letter: 'C', word: 'Cat', emoji: '🐱' },
+      { letter: 'D', word: 'Dog', emoji: '🐶' },
+      { letter: 'E', word: 'Elephant', emoji: '🐘' },
+      { letter: 'F', word: 'Fish', emoji: '🐟' },
+      { letter: 'G', word: 'Giraffe', emoji: '🦒' },
+      { letter: 'H', word: 'House', emoji: '🏠' },
+      { letter: 'I', word: 'Ice Cream', emoji: '🍦' },
+      { letter: 'J', word: 'Juice', emoji: '🧃' },
+      { letter: 'K', word: 'Kite', emoji: '🪁' },
+      { letter: 'L', word: 'Lion', emoji: '🦁' },
+      { letter: 'M', word: 'Monkey', emoji: '🐒' },
+      { letter: 'N', word: 'Nest', emoji: '🪹' },
+      { letter: 'O', word: 'Owl', emoji: '🦉' },
+      { letter: 'P', word: 'Panda', emoji: '🐼' },
+      { letter: 'Q', word: 'Queen', emoji: '👑' },
+      { letter: 'R', word: 'Rabbit', emoji: '🐰' },
+      { letter: 'S', word: 'Sun', emoji: '☀️' },
+      { letter: 'T', word: 'Train', emoji: '🚂' },
+      { letter: 'U', word: 'Umbrella', emoji: '☂️' },
+      { letter: 'V', word: 'Violin', emoji: '🎻' },
+      { letter: 'W', word: 'Watermelon', emoji: '🍉' },
+      { letter: 'X', word: 'Xylophone', emoji: '🎼' },
+      { letter: 'Y', word: 'Yacht', emoji: '⛵' },
+      { letter: 'Z', word: 'Zebra', emoji: '🦓' }
+    ];
+
+    const numbersData = [
+      { num: 1, word: 'One', emoji: '🍎' },
+      { num: 2, word: 'Two', emoji: '🎈' },
+      { num: 3, word: 'Three', emoji: '⭐' },
+      { num: 4, word: 'Four', emoji: '🐶' },
+      { num: 5, word: 'Five', emoji: '🚗' },
+      { num: 6, word: 'Six', emoji: '🌸' },
+      { num: 7, word: 'Seven', emoji: '🍦' },
+      { num: 8, word: 'Eight', emoji: '🐱' },
+      { num: 9, word: 'Nine', emoji: '🐥' },
+      { num: 10, word: 'Ten', emoji: '⚽' },
+      { num: 11, word: 'Eleven', emoji: '🍓' },
+      { num: 12, word: 'Twelve', emoji: '🍌' },
+      { num: 13, word: 'Thirteen', emoji: '🦋' },
+      { num: 14, word: 'Fourteen', emoji: '🍬' },
+      { num: 15, word: 'Fifteen', emoji: '🐟' },
+      { num: 16, word: 'Sixteen', emoji: '🎁' },
+      { num: 17, word: 'Seventeen', emoji: '🦆' },
+      { num: 18, word: 'Eighteen', emoji: '🍕' },
+      { num: 19, word: 'Nineteen', emoji: '🍔' },
+      { num: 20, word: 'Twenty', emoji: '🍰' }
+    ];
+
+    const colorsData = [
+      { name: 'Red', hex: '#FF3B30' },
+      { name: 'Blue', hex: '#007AFF' },
+      { name: 'Green', hex: '#34C759' },
+      { name: 'Yellow', hex: '#FFCC00' },
+      { name: 'Orange', hex: '#FF9500' },
+      { name: 'Purple', hex: '#AF52DE' },
+      { name: 'Pink', hex: '#FF2D55' },
+      { name: 'Brown', hex: '#A2845E' },
+      { name: 'Black', hex: '#1C1C1E' },
+      { name: 'White', hex: '#FFFFFF', textDark: true }
+    ];
+
+    const animalsData = [
+      { name: 'Lion', emoji: '🦁' },
+      { name: 'Tiger', emoji: '🐯' },
+      { name: 'Elephant', emoji: '🐘' },
+      { name: 'Monkey', emoji: '🐒' },
+      { name: 'Dog', emoji: '🐶' },
+      { name: 'Cat', emoji: '🐱' },
+      { name: 'Bear', emoji: '🐻' },
+      { name: 'Panda', emoji: '🐼' },
+      { name: 'Rabbit', emoji: '🐰' },
+      { name: 'Fox', emoji: '🦊' },
+      { name: 'Cow', emoji: '🐮' },
+      { name: 'Pig', emoji: '🐷' },
+      { name: 'Frog', emoji: '🐸' },
+      { name: 'Duck', emoji: '🦆' },
+      { name: 'Penguin', emoji: '🐧' }
+    ];
+
+    /* Text-To-Speech (TTS) Engine */
+    function speak(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Stop current speech
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.85; // Slightly slower rate for kids
+        utterance.pitch = 1.1; // Slightly friendly higher pitch
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    /* Screen Management */
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-' + screenId).classList.add('active');
+      
+      const homeBtn = document.getElementById('home-btn');
+      const title = document.getElementById('header-title');
+
+      if (screenId === 'home') {
+        homeBtn.style.display = 'none';
+        title.innerHTML = '🎈 ABC Kids';
+        speak("Welcome to ABC Kids!");
+      } else {
+        homeBtn.style.display = 'flex';
+        if (screenId === 'abc') { title.innerHTML = '🔤 ABC Alphabet'; speak("Alphabet"); }
+        if (screenId === '123') { title.innerHTML = '🔢 123 Numbers'; speak("Numbers"); }
+        if (screenId === 'colors') { title.innerHTML = '🎨 Colors'; speak("Colors"); }
+        if (screenId === 'animals') { title.innerHTML = '🦁 Animals'; speak("Animals"); }
+        if (screenId === 'game') { 
+          title.innerHTML = '🧩 Match Game'; 
+          speak("Match the letter!");
+          initGame();
+        }
+      }
+    }
+
+    /* Init ABC Cards */
+    function renderABC() {
+      const grid = document.getElementById('abc-grid');
+      grid.innerHTML = abcData.map((item) => `
+        <div class="item-card" onclick="openABCModal('${item.letter}', '${item.word}', '${item.emoji}')">
+          <span style="font-size: 32px; font-weight: bold; color: #FF5964;">${item.letter}</span>
+          <span style="font-size: 24px; margin-top: 4px;">${item.emoji}</span>
+        </div>
+      `).join('');
+    }
+
+    function openABCModal(letter, word, emoji) {
+      const content = document.getElementById('modal-content');
+      content.innerHTML = `
+        <div style="font-size: 80px; font-weight: bold; color: #FF5964; margin-bottom: 0;">${letter}</div>
+        <div style="font-size: 90px; margin: 10px 0;">${emoji}</div>
+        <div style="font-size: 32px; font-weight: bold; color: #2D3748;">${letter} is for ${word}</div>
+      `;
+      document.getElementById('detail-modal').style.display = 'flex';
+      speak(`${letter}. ${letter} is for ${word}`);
+    }
+
+    /* Init 123 Cards */
+    function render123() {
+      const grid = document.getElementById('123-grid');
+      grid.innerHTML = numbersData.map((item) => `
+        <div class="item-card" onclick="open123Modal(${item.num}, '${item.word}', '${item.emoji}')">
+          <span style="font-size: 32px; font-weight: bold; color: #35A7FF;">${item.num}</span>
+          <span style="font-size: 20px; margin-top: 2px;">${item.emoji}</span>
+        </div>
+      `).join('');
+    }
+
+    function open123Modal(num, word, emoji) {
+      const content = document.getElementById('modal-content');
+      let emojiGroup = Array(num).fill(emoji).join(' ');
+      content.innerHTML = `
+        <div style="font-size: 64px; font-weight: bold; color: #35A7FF;">${num}</div>
+        <div style="font-size: 26px; font-weight: bold; color: #4A5568; margin-bottom: 12px;">${word}</div>
+        <div style="font-size: 36px; max-height: 150px; overflow-y: auto; line-height: 1.4; padding: 8px;">${emojiGroup}</div>
+      `;
+      document.getElementById('detail-modal').style.display = 'flex';
+      speak(`${num}! ${word}!`);
+    }
+
+    /* Init Colors Grid */
+    function renderColors() {
+      const grid = document.getElementById('colors-grid');
+      grid.innerHTML = colorsData.map((item) => `
+        <div class="color-card" style="background-color: ${item.hex}; color: ${item.textDark ? '#1C1C1E' : '#FFFFFF'};" onclick="speakColor('${item.name}')">
+          ${item.name}
+        </div>
+      `).join('');
+    }
+
+    function speakColor(colorName) {
+      speak(colorName);
+    }
+
+    /* Init Animals Grid */
+    function renderAnimals() {
+      const grid = document.getElementById('animals-grid');
+      grid.innerHTML = animalsData.map((item) => `
+        <div class="item-card" onclick="openAnimalModal('${item.name}', '${item.emoji}')">
+          <span style="font-size: 48px;">${item.emoji}</span>
+          <span style="font-size: 16px; font-weight: bold; color: #2D3748; margin-top: 6px;">${item.name}</span>
+        </div>
+      `).join('');
+    }
+
+    function openAnimalModal(name, emoji) {
+      speak(name);
+    }
+
+    /* Close Modal */
+    function closeModal() {
+      document.getElementById('detail-modal').style.display = 'none';
+    }
+
+    /* Match Game Logic */
+    let currentGameTarget = null;
+    let gameScore = 0;
+
+    function initGame() {
+      const randomIndex = Math.floor(Math.random() * abcData.length);
+      currentGameTarget = abcData[randomIndex];
+
+      document.getElementById('target-emoji').innerText = currentGameTarget.emoji;
+      document.getElementById('target-word').innerText = currentGameTarget.word;
+
+      // Pick 2 other wrong letters
+      let options = [currentGameTarget.letter];
+      while (options.length < 3) {
+        let randLetter = abcData[Math.floor(Math.random() * abcData.length)].letter;
+        if (!options.includes(randLetter)) {
+          options.push(randLetter);
+        }
+      }
+      // Shuffle options
+      options.sort(() => Math.random() - 0.5);
+
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = options.map(let => `
+        <div class="draggable-letter" onclick="checkAnswer('${let}')">${let}</div>
+      `).join('');
+    }
+
+    function checkAnswer(selectedLetter) {
+      if (selectedLetter === currentGameTarget.letter) {
+        gameScore += 10;
+        document.getElementById('game-score').innerText = gameScore;
+        speak("Great Job! " + currentGameTarget.letter + " is for " + currentGameTarget.word);
+        setTimeout(initGame, 1200);
+      } else {
+        speak("Try again!");
+      }
+    }
+
+    /* Initialization */
+    window.onload = () => {
+      renderABC();
+      render123();
+      renderColors();
+      renderAnimals();
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      }
+    };
+  </script>
+</body>
+</html>
